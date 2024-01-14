@@ -3,7 +3,6 @@ import os
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QPushButton, QHBoxLayout, QTextEdit, QFileDialog, QScrollArea
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 import subprocess
-
 class CommandThread(QThread):
     finished = pyqtSignal(str)
 
@@ -31,7 +30,7 @@ class MyApp(QWidget):
         label = QLabel('Folders', self)
         self.select_folder_button = QPushButton('Select Folder', self)
         self.select_folder_button.setStyleSheet("QPushButton { border: none; outline: none; }")
-        self.subfolder_layouts = []  # List to store layouts for each subfolder
+        self.subfolder_layouts = []
         self.terminal = QTextEdit(self)
         self.terminal.setReadOnly(True)
 
@@ -102,11 +101,11 @@ class MyApp(QWidget):
 
     def toggleDarkMode(self):
         # Function to be called when the "Dark Mode" button is clicked
-        if self.styleSheet():
-            self.setStyleSheet("")
+        if self.styleSheet() == darkTheme:
+            self.setStyleSheet(lightTheme)
             self.dark_mode_button.setText("Dark Mode")
         else:
-            self.setStyleSheet("background-color: #303030; color: #FFFFFF;")
+            self.setStyleSheet(darkTheme)
             self.dark_mode_button.setText("Light Mode")
    
     def onSelectFolderButtonClick(self):
@@ -163,6 +162,7 @@ class MyApp(QWidget):
 
             # Save the layout reference for later clearing
             self.subfolder_layouts.append(subfolder_layout)
+    
     def executeCommand(self, command, message):
             if message:
                 self.appendTerminalText(message)
@@ -171,6 +171,7 @@ class MyApp(QWidget):
             command_thread = CommandThread(command, message, self)
             command_thread.finished.connect(self.onCommandFinished)
             command_thread.start()
+    
     def onCommandFinished(self, result):
         self.appendTerminalText(result + "\n" + "-" * 100)
 
@@ -215,6 +216,9 @@ class MyApp(QWidget):
         self.populateSubfolderLayouts(subfolders, self.subfolder_container_layout)
 
 if __name__ == '__main__':
+    darkTheme = open("dark theme.qss","r").read()
+    lightTheme = open("light theme.qss","r").read()
     app = QApplication(sys.argv)
+    app.setStyleSheet(lightTheme)
     window = MyApp()
     sys.exit(app.exec_())
